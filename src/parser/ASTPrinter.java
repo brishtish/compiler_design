@@ -1,5 +1,3 @@
-package parser;
-
 import ast.ASTNode;
 import utils.BanglaUtil;
 
