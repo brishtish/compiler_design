@@ -1,4 +1,4 @@
-
+package parser;
 
 import ast.ASTNode;
 import lexer.Token;
