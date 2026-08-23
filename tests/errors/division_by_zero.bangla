@@ -1,0 +1,4 @@
+//Division by zero is not allowed
+ধরো ক = ১০;
+ধরো খ = ০;
+ধরো গ = ক / খ;

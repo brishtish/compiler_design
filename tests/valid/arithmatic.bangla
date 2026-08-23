@@ -1,0 +1,5 @@
+//test arithmetic operations and operator precedence
+ধরো ক = ১০;
+ধরো খ = ২০;
+ধরো গ = ক + খ * ২; // Precedence: 20 * 2 = 40, 10 + 40 = 50
+দেখাও গ;
