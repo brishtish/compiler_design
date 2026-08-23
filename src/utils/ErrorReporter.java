@@ -3,9 +3,7 @@ package utils;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Clean, emoji-free error collector and reporter.
- */
+
 public class ErrorReporter {
 
     public static class ErrorItem {

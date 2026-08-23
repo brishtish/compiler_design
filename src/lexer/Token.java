@@ -1,9 +1,6 @@
 package lexer;
 
-/**
- * Token representation in BanglaScript compiler.
- * Includes token type, lexeme text, line number, and column number.
- */
+
 public class Token {
 
     public final TokenType type;

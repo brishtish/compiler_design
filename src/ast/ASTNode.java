@@ -2,9 +2,6 @@ package ast;
 
 import java.util.List;
 
-/**
- * Abstract Syntax Tree (AST) node definitions for BanglaScript.
- */
 public abstract class ASTNode {
 
     public String type; // Type ("সংখ্যা", "বাক্য", "boolean")

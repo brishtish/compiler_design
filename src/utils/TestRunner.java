@@ -32,12 +32,23 @@ public class TestRunner {
         collectFiles(dir, testFiles);
         Collections.sort(testFiles, (a, b) -> a.getPath().compareTo(b.getPath()));
 
+        System.out.println();
+        System.out.println("============================================================");
+        System.out.println("                   TEST CASES                     ");
+        System.out.println("============================================================");
+
         int passed = 0;
         int failed = 0;
+        int testIndex = 1;
 
         for (File f : testFiles) {
             String path = f.getPath().replace("\\", "/");
             boolean expectSuccess = !path.contains("error");
+
+            System.out.println();
+            System.out.println("------------------------------------------------------------");
+            System.out.printf("TEST %d: %s%n", testIndex++, path);
+            System.out.println("------------------------------------------------------------");
 
             String source = "";
             try {
@@ -46,18 +57,36 @@ public class TestRunner {
                 System.out.println("Could not read file: " + e.getMessage());
             }
 
+            printSourceWithLineNumbers(source);
+
             boolean actualSuccess = runPipelineOn(source);
             boolean isTestPass = (expectSuccess == actualSuccess);
 
             if (isTestPass) passed++;
             else failed++;
 
-            System.out.printf("Test: %-35s | Status: %s%n", path, (isTestPass ? "PASSED" : "FAILED"));
+            System.out.println("------------------------------------------------------------");
+            System.out.println("Expected : " + (expectSuccess ? "SUCCESS" : "ERROR"));
+            System.out.println("Actual   : " + (actualSuccess ? "SUCCESS" : "ERROR"));
+            System.out.println("Status   : " + (isTestPass ? "PASSED" : "FAILED"));
+            System.out.println("------------------------------------------------------------");
         }
 
-        System.out.printf("%nSummary: Total = %d | Passed = %d | Failed = %d%n",
+        System.out.println();
+        System.out.println("============================================================");
+        System.out.printf("TESTS SUMMARY: Total = %d | Passed = %d | Failed = %d%n",
                 testFiles.size(), passed, failed);
+        System.out.println("============================================================");
     }
+
+    private void printSourceWithLineNumbers(String source) {
+        System.out.println("SOURCE CODE:");
+        String[] lines = source.split("\n");
+        for (int i = 0; i < lines.length; i++) {
+            System.out.printf("%2d | %s%n", (i + 1), lines[i].replace("\r", ""));
+        }
+    }
+
 
     private boolean runPipelineOn(String source) {
         try {

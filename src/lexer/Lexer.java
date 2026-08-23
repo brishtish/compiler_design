@@ -3,10 +3,7 @@ package lexer;
 import utils.ErrorReporter;
 import java.util.*;
 
-/**
- * Unicode-aware Lexer (Scanner) for BanglaScript.
- * Converts UTF-8 source code into Token stream with line and column tracking.
- */
+
 public class Lexer {
 
     private final String source;

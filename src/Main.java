@@ -6,16 +6,14 @@ import parser.ASTPrinter;
 import parser.Parser;
 import semantic.SemanticAnalyzer;
 import utils.ErrorReporter;
-
+import utils.TestRunner;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Scanner;
 
-/**
- * Main Controller for Bangla Compiler.
- */
+
 public class Main {
 
     private static final String LINE = "------------------------------------------------------------";
@@ -31,7 +29,9 @@ public class Main {
             System.out.println("2. Run Lexer");
             System.out.println("3. Run Parser");
             System.out.println("4. Run Semantic Analyzer");
-            System.out.println("5. Exit");
+            System.out.println("5. Write Bangla Code");
+            System.out.println("6. Test cases");
+            System.out.println("7. Exit");
             System.out.println();
             System.out.print("Choose: ");
 
@@ -51,10 +51,17 @@ public class Main {
                     runSemantic(demoSource);
                     break;
                 case "5":
-                    System.out.println("\nExiting compiler. Goodbye!");
+                    handleWriteBanglaCode(scanner);
+                    break;
+                case "6":
+                    new TestRunner().runAll("tests");
+                    break;
+                case "7":
+                    System.out.println();
+                    System.out.println("Exiting compiler. Goodbye!");
                     return;
                 default:
-                    System.out.println("Invalid choice. Please choose 1-5.");
+                    System.out.println("Invalid choice. Please choose 1-7.");
             }
         }
     }
@@ -66,12 +73,75 @@ public class Main {
         System.out.println("╚══════════════════════════════════════════╝");
         System.out.println();
     }
+    
 
     private static String centerText(String text, int width) {
         int pad = (width - text.length()) / 2;
         int rightPad = width - text.length() - pad;
         return " ".repeat(Math.max(0, pad)) + text + " ".repeat(Math.max(0, rightPad));
     }
+
+    private static void handleWriteBanglaCode(Scanner scanner) {
+        printHeader("YOUR BANGLA CODE");
+        System.out.println("Sample syntax:");
+        System.out.println("  ধরি সংখ্যা বয়স = ২২;");
+        System.out.println("  ধরি বাক্য নাম = \"ঐশী\";");
+        System.out.println("  দেখাও(নাম);");
+        System.out.println("  যদি (বয়স >= ১৮) {");
+        System.out.println("      দেখাও(\"প্রাপ্তবয়স্ক\");");
+        System.out.println("  }");
+        System.out.println();
+        System.out.println("Type your Bangla code below (With or Without Declaring Variable Type). Type 'done' on a new line when done:");
+        System.out.println(LINE);
+
+        StringBuilder sb = new StringBuilder();
+        while (true) {
+            String line = scanner.nextLine();
+            if ("done".equalsIgnoreCase(line.trim())) {
+                break;
+            }
+            sb.append(line).append("\n");
+        }
+
+        String userSource = sb.toString().trim();
+        if (userSource.isEmpty()) {
+            System.out.println("No code entered. Returning to Main Menu.");
+            return;
+        }
+
+        while (true) {
+            printHeader("YOUR BANGLA CODE");
+            System.out.println("1. Show Source Code");
+            System.out.println("2. Run Lexer");
+            System.out.println("3. Run Parser");
+            System.out.println("4. Run Semantic Analyzer");
+            System.out.println("5. Back to Main Menu");
+            System.out.println();
+            System.out.print("Choose: ");
+
+            String choice = scanner.nextLine().trim();
+
+            switch (choice) {
+                case "1":
+                    showSourceCode(userSource);
+                    break;
+                case "2":
+                    runLexer(userSource);
+                    break;
+                case "3":
+                    runParser(userSource);
+                    break;
+                case "4":
+                    runSemantic(userSource);
+                    break;
+                case "5":
+                    return;
+                default:
+                    System.out.println("Invalid choice. Please choose 1-5.");
+            }
+        }
+    }
+
 
     private static void showSourceCode(String source) {
         System.out.println();

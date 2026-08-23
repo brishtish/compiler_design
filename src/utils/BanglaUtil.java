@@ -1,8 +1,6 @@
 package utils;
 
-/**
- * Utility functions for Bengali numerals and Unicode helpers.
- */
+
 public class BanglaUtil {
 
     /**
