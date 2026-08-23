@@ -3,7 +3,7 @@ package semantic;
 import java.util.*;
 
 /**
- * Scoped Symbol Table implementation
+ * Scoped Symbol Table implementation 
  **/
 public class SymbolTable {
 
@@ -24,15 +24,19 @@ public class SymbolTable {
         }
     }
 
-    public boolean declare(String name, String type, boolean initialized, int line) {
+    public boolean declare(String name, String type, boolean initialized, int line, Object constValue) {
         Map<String, Symbol> currentScope = scopes.getFirst();
         if (currentScope.containsKey(name)) {
             return false;
         }
-        Symbol sym = new Symbol(name, type, initialized, line);
+        Symbol sym = new Symbol(name, type, initialized, line, constValue);
         currentScope.put(name, sym);
         allRecordedSymbols.put(name, sym);
         return true;
+    }
+
+    public boolean declare(String name, String type, boolean initialized, int line) {
+        return declare(name, type, initialized, line, null);
     }
 
     public Symbol lookup(String name) {

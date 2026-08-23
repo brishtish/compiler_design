@@ -51,18 +51,60 @@ public class SemanticAnalyzer {
         }
     }
 
+    private Object evalConst(ASTNode node) {
+        if (node == null) return null;
+        if (node instanceof ASTNode.NumberNode) {
+            return ((ASTNode.NumberNode) node).value;
+        }
+        if (node instanceof ASTNode.StringNode) {
+            return ((ASTNode.StringNode) node).value;
+        }
+        if (node instanceof ASTNode.VarNode) {
+            Symbol sym = symbolTable.lookup(((ASTNode.VarNode) node).name);
+            return (sym != null) ? sym.constValue : null;
+        }
+        if (node instanceof ASTNode.BinOpNode) {
+            ASTNode.BinOpNode bin = (ASTNode.BinOpNode) node;
+            Object l = evalConst(bin.left);
+            Object r = evalConst(bin.right);
+            if (l instanceof Integer && r instanceof Integer) {
+                int leftVal = (Integer) l;
+                int rightVal = (Integer) r;
+                switch (bin.op) {
+                    case "+": return leftVal + rightVal;
+                    case "-": return leftVal - rightVal;
+                    case "*": return leftVal * rightVal;
+                    case "/": return (rightVal != 0) ? (leftVal / rightVal) : null;
+                }
+            }
+            if (bin.op.equals("+") && (l != null || r != null)) {
+                if (l instanceof String || r instanceof String) {
+                    return (l != null ? l.toString() : "") + (r != null ? r.toString() : "");
+                }
+            }
+        }
+        return null;
+    }
+
     private void checkDecl(ASTNode.DeclNode node) {
+        int errorsBefore = errors.count();
         String exprType = checkExpr(node.expr);
         String targetType = (node.declaredType != null) ? node.declaredType : exprType;
         node.type = targetType;
 
+        boolean hasTypeMismatch = false;
         if (!targetType.equals(exprType) && !"unknown".equals(exprType)) {
             errors.add("Semantic", node.line, "Type mismatch: Cannot assign '" + exprType + "' to '" + node.name + "' of declared type '" + targetType + "'.");
+            hasTypeMismatch = true;
         }
 
-        boolean success = symbolTable.declare(node.name, targetType, true, node.line);
-        if (!success) {
-            errors.add("Semantic", node.line, "Variable '" + node.name + "' is already declared in this scope.");
+        boolean exprHadError = (errors.count() > errorsBefore) || hasTypeMismatch || "unknown".equals(exprType);
+        if (!exprHadError) {
+            Object constVal = evalConst(node.expr);
+            boolean success = symbolTable.declare(node.name, targetType, true, node.line, constVal);
+            if (!success) {
+                errors.add("Semantic", node.line, "Variable '" + node.name + "' is already declared in this scope.");
+            }
         }
     }
 
@@ -79,6 +121,8 @@ public class SemanticAnalyzer {
         if (!sym.type.equals(exprType) && !"unknown".equals(exprType)) {
             errors.add("Semantic", node.line, "Type mismatch: Cannot assign '" + exprType + "' to variable '" + node.name + "' of type '" + sym.type + "'.");
         }
+
+        sym.constValue = evalConst(node.expr);
     }
 
     private void checkPrint(ASTNode.PrintNode node) {
@@ -101,7 +145,7 @@ public class SemanticAnalyzer {
     }
 
     private void checkWhile(ASTNode.WhileNode node) {
-         checkExpr(node.condition);
+        checkExpr(node.condition);
 
         symbolTable.enterScope();
         for (ASTNode s : node.body) checkStmt(s);
@@ -137,13 +181,11 @@ public class SemanticAnalyzer {
             String rightType = checkExpr(bin.right);
             String op = bin.op;
 
-            // Division-by-zero check
+            // Division-by-zero check (both literals and variables/expressions)
             if (op.equals("/")) {
-                if (bin.right instanceof ASTNode.NumberNode) {
-                    ASTNode.NumberNode rightNum = (ASTNode.NumberNode) bin.right;
-                    if (rightNum.value == 0) {
-                        errors.add("Semantic", bin.line, "Division by zero is not allowed.");
-                    }
+                Object rightConst = evalConst(bin.right);
+                if (rightConst instanceof Integer && ((Integer) rightConst) == 0) {
+                    errors.add("Semantic", bin.line, "Division by zero is not allowed.");
                 }
             }
 
