@@ -68,19 +68,22 @@ public class Main {
                 case "7":
                     runWasmCode(demoSource);
                     break;
-                
                 case "8":
+                    runFullPipeline(demoSource);
+                    break;    
+                
+                case "9":
                     handleWriteBanglaCode(scanner);
                     break;
-                case "9":
+                case "10":
                     new TestRunner().runAll("tests");
                     break;
-                case "10":
+                case "11":
                     System.out.println();
                     System.out.println("Exiting compiler. Goodbye!");
                     return;
                 default:
-                    System.out.println("Invalid choice. Please choose 1-10.");
+                    System.out.println("Invalid choice. Please choose 1-11.");
             }
         }
     }
@@ -166,11 +169,13 @@ public class Main {
                 case "7":
                     runWasmCode(userSource);
                     break;
-                
                 case "8":
+                    runFullPipeline(userSource);
+                    break;
+                case "9":
                     return;
                 default:
-                    System.out.println("Invalid choice. Please choose 1-8.");
+                    System.out.println("Invalid choice. Please choose 1-9.");
             }
         }
     }
@@ -352,7 +357,33 @@ public class Main {
         System.out.println("Generated: " + outputPath);
         System.out.println("WebAssembly CodeGen Status: OK");
         return true;
-    } 
+    }
+    
+    private static void runFullPipeline(String source) {
+        printHeader("RUN FULL PIPELINE");
+        System.out.println("[PHASE 1/6] LEXICAL ANALYSIS");
+        runLexer(source);
+
+        System.out.println("\n[PHASE 2/6] SYNTAX ANALYSIS (PARSER & AST)");
+        runParser(source);
+
+        System.out.println("\n[PHASE 3/6] SEMANTIC ANALYSIS & SYMBOL TABLE");
+        runSemantic(source);
+
+        System.out.println("\n[PHASE 4/6] THREE ADDRESS CODE (TAC)");
+        runTAC(source);
+
+        System.out.println("\n[PHASE 5/6] PYTHON TARGET CODE GENERATION");
+        runPythonCode(source);
+
+        System.out.println("\n[PHASE 6/6] WEBASSEMBLY TARGET CODE GENERATION");
+        runWasmCode(source);
+
+        System.out.println("\n" + LINE);
+        System.out.println("[OK] FULL PIPELINE COMPLETED SUCCESSFULLY!");
+        System.out.println(LINE);
+    }
+    
     private static String loadFile(String path) {
         try {
             return new String(Files.readAllBytes(Paths.get(path)), StandardCharsets.UTF_8);
