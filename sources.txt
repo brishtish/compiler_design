@@ -1,5 +1,7 @@
 C:\Users\ASUS\OneDrive\Desktop\BanglaCompiler\src\Main.java
 C:\Users\ASUS\OneDrive\Desktop\BanglaCompiler\src\ast\ASTNode.java
+C:\Users\ASUS\OneDrive\Desktop\BanglaCompiler\src\codegen\CodeGenerator.java
+C:\Users\ASUS\OneDrive\Desktop\BanglaCompiler\src\codegen\WasmCodeGenerator.java
 C:\Users\ASUS\OneDrive\Desktop\BanglaCompiler\src\lexer\Lexer.java
 C:\Users\ASUS\OneDrive\Desktop\BanglaCompiler\src\lexer\Token.java
 C:\Users\ASUS\OneDrive\Desktop\BanglaCompiler\src\lexer\TokenType.java
@@ -8,6 +10,8 @@ C:\Users\ASUS\OneDrive\Desktop\BanglaCompiler\src\parser\Parser.java
 C:\Users\ASUS\OneDrive\Desktop\BanglaCompiler\src\semantic\SemanticAnalyzer.java
 C:\Users\ASUS\OneDrive\Desktop\BanglaCompiler\src\semantic\Symbol.java
 C:\Users\ASUS\OneDrive\Desktop\BanglaCompiler\src\semantic\SymbolTable.java
+C:\Users\ASUS\OneDrive\Desktop\BanglaCompiler\src\tac\TACGenerator.java
+C:\Users\ASUS\OneDrive\Desktop\BanglaCompiler\src\tac\TACInstr.java
 C:\Users\ASUS\OneDrive\Desktop\BanglaCompiler\src\utils\BanglaUtil.java
 C:\Users\ASUS\OneDrive\Desktop\BanglaCompiler\src\utils\ErrorReporter.java
 C:\Users\ASUS\OneDrive\Desktop\BanglaCompiler\src\utils\TestRunner.java

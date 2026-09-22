@@ -1,5 +1,6 @@
 import ast.ASTNode;
 import codegen.CodeGenerator;
+import codegen.WasmCodeGenerator;
 import lexer.Lexer;
 import lexer.Token;
 import lexer.TokenType;
@@ -64,24 +65,19 @@ public class Main {
                 case "6":
                     runPythonCode(demoSource);
                     break;
+                
                 case "7":
-                    //runWasmCode(demoSource);
-                    break;
-                case "8":
-                    //runFullPipeline(demoSource);
-                    break;
-                case "9":
                     handleWriteBanglaCode(scanner);
                     break;
-                case "10":
+                case "8":
                     new TestRunner().runAll("tests");
                     break;
-                case "11":
+                case "9":
                     System.out.println();
                     System.out.println("Exiting compiler. Goodbye!");
                     return;
                 default:
-                    System.out.println("Invalid choice. Please choose 1-11.");
+                    System.out.println("Invalid choice. Please choose 1-9.");
             }
         }
     }
@@ -164,13 +160,8 @@ public class Main {
                 case "6":
                     runPythonCode(userSource);
                     break;
+                
                 case "7":
-                    //runWasmCode(userSource);
-                    break;
-                case "8":
-                    //runFullPipeline(userSource);
-                    break;
-                case "9":
                     return;
                 default:
                     System.out.println("Invalid choice. Please choose 1-5.");
@@ -324,6 +315,8 @@ public class Main {
         return true;
     }
 
+      
+    
     private static String loadFile(String path) {
         try {
             return new String(Files.readAllBytes(Paths.get(path)), StandardCharsets.UTF_8);
