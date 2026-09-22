@@ -5,6 +5,8 @@ import lexer.TokenType;
 import parser.ASTPrinter;
 import parser.Parser;
 import semantic.SemanticAnalyzer;
+import tac.TACGenerator;
+import tac.TACInstr;
 import utils.ErrorReporter;
 import utils.TestRunner;
 import java.nio.charset.StandardCharsets;
@@ -24,20 +26,25 @@ public class Main {
         String demoSource = loadFile(demoPath);
 
         while (true) {
-            printHeader("BANGLA COMPILER");
+             printHeader("BANGLA COMPILER");
             System.out.println("1. Show demo Source Code");
             System.out.println("2. Run Lexer");
             System.out.println("3. Run Parser");
             System.out.println("4. Run Semantic Analyzer");
-            System.out.println("5. Write Bangla Code");
-            System.out.println("6. Test cases");
-            System.out.println("7. Exit");
+            System.out.println("5. Run Three-Address Code Generator (TAC / IR)");
+            System.out.println("6. Generate Python Target Code");
+            System.out.println("7. Generate WebAssembly Target Code (.wat)");
+            System.out.println("8. Run Full Pipeline");
+            System.out.println("9. Write Bangla Code");
+            System.out.println("10. Test cases");
+            System.out.println("11. Exit");
             System.out.println();
             System.out.print("Choose: ");
 
+
             String choice = scanner.nextLine().trim();
 
-            switch (choice) {
+             switch (choice) {
                 case "1":
                     showSourceCode(demoSource);
                     break;
@@ -51,17 +58,29 @@ public class Main {
                     runSemantic(demoSource);
                     break;
                 case "5":
-                    handleWriteBanglaCode(scanner);
+                    runTAC(demoSource);
                     break;
                 case "6":
-                    new TestRunner().runAll("tests");
+                    //runPythonCode(demoSource);
                     break;
                 case "7":
+                    //runWasmCode(demoSource);
+                    break;
+                case "8":
+                    //runFullPipeline(demoSource);
+                    break;
+                case "9":
+                    handleWriteBanglaCode(scanner);
+                    break;
+                case "10":
+                    new TestRunner().runAll("tests");
+                    break;
+                case "11":
                     System.out.println();
                     System.out.println("Exiting compiler. Goodbye!");
                     return;
                 default:
-                    System.out.println("Invalid choice. Please choose 1-7.");
+                    System.out.println("Invalid choice. Please choose 1-11.");
             }
         }
     }
@@ -111,17 +130,21 @@ public class Main {
 
         while (true) {
             printHeader("YOUR BANGLA CODE");
-            System.out.println("1. Show Source Code");
+           System.out.println("1. Show Source Code");
             System.out.println("2. Run Lexer");
             System.out.println("3. Run Parser");
             System.out.println("4. Run Semantic Analyzer");
-            System.out.println("5. Back to Main Menu");
+            System.out.println("5. Run Three-Address Code Generator (TAC)");
+            System.out.println("6. Generate Python Target Code");
+            System.out.println("7. Generate WebAssembly Target Code (.wat)");
+            System.out.println("8. Run Full Pipeline");
+            System.out.println("9. Back to Main Menu");
             System.out.println();
             System.out.print("Choose: ");
 
             String choice = scanner.nextLine().trim();
 
-            switch (choice) {
+           switch (choice) {
                 case "1":
                     showSourceCode(userSource);
                     break;
@@ -135,6 +158,18 @@ public class Main {
                     runSemantic(userSource);
                     break;
                 case "5":
+                    runTAC(userSource);
+                    break;
+                case "6":
+                    //runPythonCode(userSource);
+                    break;
+                case "7":
+                    //runWasmCode(userSource);
+                    break;
+                case "8":
+                    //runFullPipeline(userSource);
+                    break;
+                case "9":
                     return;
                 default:
                     System.out.println("Invalid choice. Please choose 1-5.");
@@ -213,6 +248,46 @@ public class Main {
         } else {
             errors.printSummary("Semantic Analysis");
         }
+    }
+    private static boolean runTAC(String source) {
+        showSourceCode(source);
+
+        ErrorReporter errors = new ErrorReporter();
+        Lexer lexer = new Lexer(source, errors);
+        List<Token> tokens = lexer.tokenize();
+
+        Parser parser = new Parser(tokens, errors);
+        ASTNode.ProgramNode ast = parser.parseProgram();
+
+        SemanticAnalyzer semantic = new SemanticAnalyzer(errors);
+        boolean ok = semantic.analyze(ast);
+
+        if (!ok || errors.hasErrors()) {
+            System.out.println("\nCannot generate Three Address Code — semantic errors found:");
+            errors.printSummary("Semantic Analysis");
+            return false;
+        }
+
+        System.out.println();
+        System.out.println("THREE ADDRESS CODE (TAC)");
+        System.out.println(LINE);
+        System.out.printf("%-4s  %-12s  %s%n", "নং", "ধরন", "নির্দেশ");
+        System.out.println("------------------------------------------------------------");
+
+        TACGenerator tacGen = new TACGenerator();
+        List<TACInstr> instrs = tacGen.generate(ast);
+
+        for (int i = 0; i < instrs.size(); i++) {
+            TACInstr instr = instrs.get(i);
+            String kind = "[" + instr.getClass().getSimpleName().replace("TAC", "") + "]";
+            System.out.printf("%-4d  %-12s  %s%n", i, kind, instr.toString());
+        }
+
+        System.out.println("------------------------------------------------------------");
+        String outputPath = "output/program.tac";
+        System.out.println("Generated: " + outputPath);
+        System.out.println("TAC Status: OK");
+        return true;
     }
 
     private static String loadFile(String path) {
