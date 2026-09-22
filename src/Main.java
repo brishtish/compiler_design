@@ -1,4 +1,5 @@
 import ast.ASTNode;
+import codegen.CodeGenerator;
 import lexer.Lexer;
 import lexer.Token;
 import lexer.TokenType;
@@ -61,7 +62,7 @@ public class Main {
                     runTAC(demoSource);
                     break;
                 case "6":
-                    //runPythonCode(demoSource);
+                    runPythonCode(demoSource);
                     break;
                 case "7":
                     //runWasmCode(demoSource);
@@ -161,7 +162,7 @@ public class Main {
                     runTAC(userSource);
                     break;
                 case "6":
-                    //runPythonCode(userSource);
+                    runPythonCode(userSource);
                     break;
                 case "7":
                     //runWasmCode(userSource);
@@ -287,6 +288,39 @@ public class Main {
         String outputPath = "output/program.tac";
         System.out.println("Generated: " + outputPath);
         System.out.println("TAC Status: OK");
+        return true;
+    }
+
+        private static boolean runPythonCode(String source) {
+        showSourceCode(source);
+
+        ErrorReporter errors = new ErrorReporter();
+        Lexer lexer = new Lexer(source, errors);
+        List<Token> tokens = lexer.tokenize();
+
+        Parser parser = new Parser(tokens, errors);
+        ASTNode.ProgramNode ast = parser.parseProgram();
+
+        SemanticAnalyzer semantic = new SemanticAnalyzer(errors);
+        boolean ok = semantic.analyze(ast);
+
+        if (!ok || errors.hasErrors()) {
+            System.out.println("\nCannot generate Python Target Code — semantic errors found:");
+            errors.printSummary("Semantic Analysis");
+            return false;
+        }
+
+        String outputPath = "output/program.py";
+        System.out.println();
+        System.out.println("PYTHON TARGET CODE");
+        System.out.println(LINE);
+
+        CodeGenerator codeGen = new CodeGenerator();
+        String pythonCode = codeGen.generatePythonCode(ast, outputPath);
+        System.out.print(pythonCode);
+        System.out.println("------------------------------------------------------------");
+        System.out.println("Generated: " + outputPath);
+        System.out.println("Python CodeGen Status: OK");
         return true;
     }
 

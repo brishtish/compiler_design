@@ -6,7 +6,7 @@ package semantic;
 public class Symbol {
     public final String name;
     public final String type; // "সংখ্যা" or "বাক্য"
-    public final boolean initialized;
+    public boolean initialized;
     public final int lineDefined;
     public Object constValue;
 

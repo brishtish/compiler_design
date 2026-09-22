@@ -3,14 +3,6 @@ package semantic;
 import ast.ASTNode;
 import utils.ErrorReporter;
 
-/**
- * Semantic Analyzer and Type Checker for BanglaScript.
- * Features:
- *   - Variable declaration verification
- *   - Scope-level duplicate check
- *   - Static type checking (সংখ্যা vs বাক্য)
- *   - Division-by-zero semantic check
- **/
 public class SemanticAnalyzer {
 
     private final SymbolTable symbolTable;
@@ -30,7 +22,8 @@ public class SemanticAnalyzer {
     }
 
     public boolean analyze(ASTNode.ProgramNode program) {
-        if (program == null) return false;
+        if (program == null)
+            return false;
         for (ASTNode stmt : program.statements) {
             checkStmt(stmt);
         }
@@ -52,7 +45,8 @@ public class SemanticAnalyzer {
     }
 
     private Object evalConst(ASTNode node) {
-        if (node == null) return null;
+        if (node == null)
+            return null;
         if (node instanceof ASTNode.NumberNode) {
             return ((ASTNode.NumberNode) node).value;
         }
@@ -71,10 +65,14 @@ public class SemanticAnalyzer {
                 int leftVal = (Integer) l;
                 int rightVal = (Integer) r;
                 switch (bin.op) {
-                    case "+": return leftVal + rightVal;
-                    case "-": return leftVal - rightVal;
-                    case "*": return leftVal * rightVal;
-                    case "/": return (rightVal != 0) ? (leftVal / rightVal) : null;
+                    case "+":
+                        return leftVal + rightVal;
+                    case "-":
+                        return leftVal - rightVal;
+                    case "*":
+                        return leftVal * rightVal;
+                    case "/":
+                        return (rightVal != 0) ? (leftVal / rightVal) : null;
                 }
             }
             if (bin.op.equals("+") && (l != null || r != null)) {
@@ -88,13 +86,23 @@ public class SemanticAnalyzer {
 
     private void checkDecl(ASTNode.DeclNode node) {
         int errorsBefore = errors.count();
+        if (node.expr == null) {
+            boolean success = symbolTable.declare(node.name, node.declaredType, false, node.line, null);
+
+            if (!success) {
+                errors.add( "Semantic", node.line, "Variable '" + node.name + "' is already declared in this scope.");
+            }
+
+            return;
+        }
         String exprType = checkExpr(node.expr);
         String targetType = (node.declaredType != null) ? node.declaredType : exprType;
         node.type = targetType;
 
         boolean hasTypeMismatch = false;
         if (!targetType.equals(exprType) && !"unknown".equals(exprType)) {
-            errors.add("Semantic", node.line, "Type mismatch: Cannot assign '" + exprType + "' to '" + node.name + "' of declared type '" + targetType + "'.");
+            errors.add("Semantic", node.line, "Type mismatch: Cannot assign '" + exprType + "' to '" + node.name
+                    + "' of declared type '" + targetType + "'.");
             hasTypeMismatch = true;
         }
 
@@ -111,7 +119,8 @@ public class SemanticAnalyzer {
     private void checkAssign(ASTNode.AssignNode node) {
         Symbol sym = symbolTable.lookup(node.name);
         if (sym == null) {
-            errors.add("Semantic", node.line, "Variable '" + node.name + "' is assigned before declaration (declare with 'ধরো').");
+            errors.add("Semantic", node.line,
+                    "Variable '" + node.name + "' is assigned before declaration (declare with 'ধরো').");
             return;
         }
 
@@ -119,7 +128,8 @@ public class SemanticAnalyzer {
         node.type = exprType;
 
         if (!sym.type.equals(exprType) && !"unknown".equals(exprType)) {
-            errors.add("Semantic", node.line, "Type mismatch: Cannot assign '" + exprType + "' to variable '" + node.name + "' of type '" + sym.type + "'.");
+            errors.add("Semantic", node.line, "Type mismatch: Cannot assign '" + exprType + "' to variable '"
+                    + node.name + "' of type '" + sym.type + "'.");
         }
 
         sym.constValue = evalConst(node.expr);
@@ -134,12 +144,14 @@ public class SemanticAnalyzer {
         checkExpr(node.condition);
 
         symbolTable.enterScope();
-        for (ASTNode s : node.thenBranch) checkStmt(s);
+        for (ASTNode s : node.thenBranch)
+            checkStmt(s);
         symbolTable.exitScope();
 
         if (!node.elseBranch.isEmpty()) {
             symbolTable.enterScope();
-            for (ASTNode s : node.elseBranch) checkStmt(s);
+            for (ASTNode s : node.elseBranch)
+                checkStmt(s);
             symbolTable.exitScope();
         }
     }
@@ -148,11 +160,14 @@ public class SemanticAnalyzer {
         checkExpr(node.condition);
 
         symbolTable.enterScope();
-        for (ASTNode s : node.body) checkStmt(s);
+        for (ASTNode s : node.body)
+            checkStmt(s);
         symbolTable.exitScope();
     }
 
     private String checkExpr(ASTNode node) {
+        if (node == null)
+            return "unknown";
         if (node instanceof ASTNode.NumberNode) {
             node.type = "সংখ্যা";
             return "সংখ্যা";
@@ -177,7 +192,7 @@ public class SemanticAnalyzer {
 
         if (node instanceof ASTNode.BinOpNode) {
             ASTNode.BinOpNode bin = (ASTNode.BinOpNode) node;
-            String leftType  = checkExpr(bin.left);
+            String leftType = checkExpr(bin.left);
             String rightType = checkExpr(bin.right);
             String op = bin.op;
 
@@ -191,15 +206,21 @@ public class SemanticAnalyzer {
 
             // Comparison operators: == != < > <= >=
             if (op.equals("==") || op.equals("!=") || op.equals("<") ||
-                op.equals(">")  || op.equals("<=") || op.equals(">=")) {
-                
+                    op.equals(">") || op.equals("<=") || op.equals(">=")) {
+
                 if (op.equals("==") || op.equals("!=")) {
                     if (!leftType.equals(rightType) && !leftType.equals("unknown") && !rightType.equals("unknown")) {
-                        errors.add("Semantic", bin.line, "Cannot compare incompatible types with '" + op + "': '" + leftType + "' and '" + rightType + "'.");
+                        errors.add("Semantic", bin.line, "Cannot compare incompatible types with '" + op + "': '"
+                                + leftType + "' and '" + rightType + "'.");
                     }
-                } else {
-                    if ((!"সংখ্যা".equals(leftType) || !"সংখ্যা".equals(rightType)) && !"unknown".equals(leftType) && !"unknown".equals(rightType)) {
-                        errors.add("Semantic", bin.line, "Relational operator '" + op + "' requires 'সংখ্যা' (int) operands, got: '" + leftType + "' and '" + rightType + "'.");
+                }
+                
+                else {
+                    if ((!"সংখ্যা".equals(leftType) || !"সংখ্যা".equals(rightType)) && !"unknown".equals(leftType)
+                            && !"unknown".equals(rightType)) {
+                        errors.add("Semantic", bin.line,
+                                "Relational operator '" + op + "' requires 'সংখ্যা' (int) operands, got: '" + leftType
+                                        + "' and '" + rightType + "'.");
                     }
                 }
                 bin.type = "boolean";
@@ -214,8 +235,10 @@ public class SemanticAnalyzer {
 
             // Arithmetic: + - * /
             if (op.equals("+") || op.equals("-") || op.equals("*") || op.equals("/")) {
-                if ((!"সংখ্যা".equals(leftType) || !"সংখ্যা".equals(rightType)) && !"unknown".equals(leftType) && !"unknown".equals(rightType)) {
-                    errors.add("Semantic", bin.line, "Operator '" + op + "' requires 'সংখ্যা' (int) operands, got: '" + leftType + "' and '" + rightType + "'.");
+                if ((!"সংখ্যা".equals(leftType) || !"সংখ্যা".equals(rightType)) && !"unknown".equals(leftType)
+                        && !"unknown".equals(rightType)) {
+                    errors.add("Semantic", bin.line, "Operator '" + op + "' requires 'সংখ্যা' (int) operands, got: '"
+                            + leftType + "' and '" + rightType + "'.");
                 }
                 bin.type = "সংখ্যা";
                 return "সংখ্যা";
