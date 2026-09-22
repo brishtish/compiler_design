@@ -65,19 +65,22 @@ public class Main {
                 case "6":
                     runPythonCode(demoSource);
                     break;
-                
                 case "7":
+                    runWasmCode(demoSource);
+                    break;
+                
+                case "8":
                     handleWriteBanglaCode(scanner);
                     break;
-                case "8":
+                case "9":
                     new TestRunner().runAll("tests");
                     break;
-                case "9":
+                case "10":
                     System.out.println();
                     System.out.println("Exiting compiler. Goodbye!");
                     return;
                 default:
-                    System.out.println("Invalid choice. Please choose 1-9.");
+                    System.out.println("Invalid choice. Please choose 1-10.");
             }
         }
     }
@@ -160,11 +163,14 @@ public class Main {
                 case "6":
                     runPythonCode(userSource);
                     break;
-                
                 case "7":
+                    runWasmCode(userSource);
+                    break;
+                
+                case "8":
                     return;
                 default:
-                    System.out.println("Invalid choice. Please choose 1-5.");
+                    System.out.println("Invalid choice. Please choose 1-8.");
             }
         }
     }
@@ -315,8 +321,38 @@ public class Main {
         return true;
     }
 
-      
-    
+     private static boolean runWasmCode(String source) {
+        showSourceCode(source);
+
+        ErrorReporter errors = new ErrorReporter();
+        Lexer lexer = new Lexer(source, errors);
+        List<Token> tokens = lexer.tokenize();
+
+        Parser parser = new Parser(tokens, errors);
+        ASTNode.ProgramNode ast = parser.parseProgram();
+
+        SemanticAnalyzer semantic = new SemanticAnalyzer(errors);
+        boolean ok = semantic.analyze(ast);
+
+        if (!ok || errors.hasErrors()) {
+            System.out.println("\nCannot generate WebAssembly Target Code — semantic errors found:");
+            errors.printSummary("Semantic Analysis");
+            return false;
+        }
+
+        String outputPath = "output/program.wat";
+        System.out.println();
+        System.out.println("WEBASSEMBLY TARGET CODE (.wat)");
+        System.out.println(LINE);
+
+        WasmCodeGenerator wasmGen = new WasmCodeGenerator();
+        String wasmCode = wasmGen.generateWasmCode(ast, outputPath);
+        System.out.print(wasmCode);
+        System.out.println("------------------------------------------------------------");
+        System.out.println("Generated: " + outputPath);
+        System.out.println("WebAssembly CodeGen Status: OK");
+        return true;
+    } 
     private static String loadFile(String path) {
         try {
             return new String(Files.readAllBytes(Paths.get(path)), StandardCharsets.UTF_8);
