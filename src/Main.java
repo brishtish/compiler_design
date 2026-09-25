@@ -28,7 +28,7 @@ public class Main {
         String demoSource = loadFile(demoPath);
 
         while (true) {
-             printHeader("BANGLA COMPILER");
+             printHeader("BANGLA SCRIPT");
             System.out.println("1. Show demo Source Code");
             System.out.println("2. Run Lexer");
             System.out.println("3. Run Parser");
